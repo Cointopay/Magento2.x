@@ -85,7 +85,8 @@ $order = $block->getOrder();
 	        <?php $cointopay_content = $block->getCointopayHtml() ?>
 	        <?php if ($cointopay_content) { ?>
 		        <div class="popup-overlay cointopay active">
-		          	<div class="popup-content cointopay active">    
+		          	<div class="popup-content cointopay active">
+                <img src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" /> 
 			            <h1> PAYMENT DETAILS </h1>
 			            <img src="<?= $cointopay_content->QRCodeURL ?>" alt="QR Scan Cointopay" />
 			            <div class="cointopay_details">
