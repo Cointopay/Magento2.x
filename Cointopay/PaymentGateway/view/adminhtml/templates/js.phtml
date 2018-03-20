@@ -1,0 +1,29 @@
+<script type="text/javascript">
+    require(
+        ['jquery'],
+        function($) {
+            $(function() {
+                $('#payment_us_cointopay_gateway_merchant_gateway_id').on('change', function () {
+                    var merchant_id = $(this).val();
+                    var length_id = merchant_id.length;
+                    if (length_id > 2) {
+                        $.ajax ({
+                            url: '<?php echo $this->getAjaxUrl() ?>',
+                            showLoader: true,
+                            data: {merchant:merchant_id},
+                            type: "POST",
+                            success: function(result) {
+                                $('#payment_us_cointopay_gateway_supported_coins').html('');
+                                if (result.length) {
+                                    $.each(result, function () {
+                                        $('#payment_us_cointopay_gateway_supported_coins').append('<option value="'+this.value+'">'+this.title+'</option>');
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+                
+            });
+        });
+</script>

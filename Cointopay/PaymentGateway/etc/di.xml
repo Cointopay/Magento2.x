@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2018 Cointopay. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="CointopayPaymentGatewayFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Cointopay\PaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Cointopay\PaymentGateway\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">CointopayPaymentGatewayValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">CointopayPaymentGatewayCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="CointopayPaymentGatewayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\Cointopay\PaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Logger, initialized with CointopayPaymentGatewayConfig -->
+    <virtualType name="CointopayPaymentGatewayLogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Cointopay\PaymentGateway\Gateway\Http\Client\ClientMock">
+        <arguments>
+            <argument name="logger" xsi:type="object">CointopayPaymentGatewayLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="CointopayPaymentGatewayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">CointopayPaymentGatewayAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">CointopayPaymentGatewayCaptureCommand</item>
+                <item name="void" xsi:type="string">CointopayPaymentGatewayVoidCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="CointopayPaymentGatewayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">CointopayPaymentGatewayAuthorizationRequest</argument>
+            <argument name="handler" xsi:type="object">CointopayPaymentGatewayResponseHandlerComposite</argument>
+            <argument name="transferFactory" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorization Request -->
+    <virtualType name="CointopayPaymentGatewayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction" xsi:type="string">Cointopay\PaymentGateway\Gateway\Request\AuthorizationRequest</item>
+                <item name="mockData" xsi:type="string">Cointopay\PaymentGateway\Gateway\Request\MockDataRequest</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Cointopay\PaymentGateway\Gateway\Request\AuthorizationRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Capture command -->
+    <virtualType name="CointopayPaymentGatewayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Cointopay\PaymentGateway\Gateway\Request\CaptureRequest</argument>
+            <argument name="handler" xsi:type="object">Cointopay\PaymentGateway\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Cointopay\PaymentGateway\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture Request -->
+    <type name="Cointopay\PaymentGateway\Gateway\Request\CaptureRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Void command -->
+    <virtualType name="CointopayPaymentGatewayVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Cointopay\PaymentGateway\Gateway\Request\VoidRequest</argument>
+            <argument name="handler" xsi:type="object">Cointopay\PaymentGateway\Gateway\Response\TxnIdHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Cointopay\PaymentGateway\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Cointopay\PaymentGateway\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Void Request -->
+    <type name="Cointopay\PaymentGateway\Gateway\Request\VoidRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Response handlers -->
+    <virtualType name="CointopayPaymentGatewayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Cointopay\PaymentGateway\Gateway\Response\TxnIdHandler</item>
+                <item name="fraud" xsi:type="string">Cointopay\PaymentGateway\Gateway\Response\FraudHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="CointopayPaymentGatewayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">CointopayPaymentGatewayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="CointopayPaymentGatewayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Cointopay\PaymentGateway\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">CointopayPaymentGatewayConfig</argument>
+        </arguments>
+    </type>
+
+</config>

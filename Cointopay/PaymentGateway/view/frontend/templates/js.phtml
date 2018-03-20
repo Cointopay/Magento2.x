@@ -1,0 +1,69 @@
+<script type="text/javascript">
+    require(
+        ['jquery'],
+        function($) {
+            $(function() {
+                $(document).on('change', '.cointopay_coin_val', function (event) {
+                    event.preventDefault();
+                    selected_coin = $('.cointopay_coin_val').val();
+                    $.ajax ({
+                        url: '<?php echo $this->getCoinsPaymentUrl() ?>',
+                        showLoader: true,
+                        data: {paymentaction:selected_coin, type:'order'},
+                        type: "POST",
+                        success: function(result) {
+                            // api response
+                        }
+                    });
+                });
+                
+                interval = setInterval(function() {
+                    if ($('.cointopay_coin_val').length) {
+                        selected_coin = $('.cointopay_coin_val').val();
+                        $.ajax ({
+                            url: '<?php echo $this->getCoinsPaymentUrl() ?>',
+                            showLoader: true,
+                            data: {paymentaction:selected_coin, type:'order'},
+                            type: "POST",
+                            success: function(result) {
+                                // api response
+                            }
+                        });
+                        clearInterval(interval);
+                    }
+                }, 1000);
+
+                // confirm order payment status
+                $(document).on('click', '#confirm_payments', function (event) {
+                    event.preventDefault();
+                    transaction_id = $('#cointopay_trid').val();
+                    $.ajax ({
+                        url: '<?php echo $this->getCoinsPaymentUrl() ?>',
+                        showLoader: true,
+                        data: {paymentaction:transaction_id, type:'status'},
+                        type: "POST",
+                        success: function(result) {
+                            var cointopay_response = JSON.parse(result);
+                            if (cointopay_response[1] == 'paid') {
+                                $('#cointo_complete_order').show();
+                                $('#cointo_complete_order')[0].click();
+                                $(".cointopay.popup-overlay, .cointopay.popup-content").removeClass("active");
+                                $(".cointopay-order").hide();
+                            } else if (cointopay_response[1] == 'waiting') {
+                                alert('Please double check you have successfully transfered payments.');
+                            } else if (cointopay_response[1] == 'expired') {
+                                alert('Sorry payment time expired now.');
+                                window.location.href = window.location.protocol + "//" + window.location.host + "/";
+                                return;
+                            }
+                        }
+                    });
+                });
+                setInterval(function() {
+                    if ($('#confirm_payments').length) {
+                        $('#confirm_payments')[0].click();
+                    }
+                }, 300000);
+            });
+        });
+</script>
