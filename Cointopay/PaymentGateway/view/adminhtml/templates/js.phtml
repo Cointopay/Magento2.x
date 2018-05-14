@@ -10,14 +10,40 @@
                         $.ajax ({
                             url: '<?php echo $this->getAjaxUrl() ?>',
                             showLoader: true,
-                            data: {merchant:merchant_id},
+                            data: {merchant:merchant_id, type:'merchant'},
                             type: "POST",
                             success: function(result) {
                                 $('#payment_us_cointopay_gateway_supported_coins').html('');
+                                $('#payment_us_cointopay_gateway_merchant_gateway_id').css('border','1px solid #adadad');
+                                $('.incorrect-merchant').remove();
                                 if (result.length) {
                                     $.each(result, function () {
                                         $('#payment_us_cointopay_gateway_supported_coins').append('<option value="'+this.value+'">'+this.title+'</option>');
                                     });
+                                } else {
+                                    $('#payment_us_cointopay_gateway_merchant_gateway_id').css('border','1px solid red');
+                                    $('#payment_us_cointopay_gateway_merchant_gateway_id').closest('td').append('<span style="color:red" class="incorrect-merchant">MerchantID should be type Integer, please correct. </span>');
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $('#payment_us_cointopay_gateway_merchant_gateway_security').on('change', function () {
+                    var security_code = $(this).val();
+                    var length_id = security_code.length;
+                    if (length_id > 2) {
+                        $.ajax ({
+                            url: '<?php echo $this->getAjaxUrl() ?>',
+                            showLoader: true,
+                            data: {merchant:security_code, type:'security'},
+                            type: "POST",
+                            success: function(result) {
+                                $('#payment_us_cointopay_gateway_merchant_gateway_security').css('border','1px solid #adadad');
+                                $('.incorrect-security').remove();
+                                if (result.status == 'error') {
+                                    $('#payment_us_cointopay_gateway_merchant_gateway_security').css('border','1px solid red');
+                                    $('#payment_us_cointopay_gateway_merchant_gateway_security').closest('td').append('<span style="color:red" class="incorrect-security">SecurityCode should be type Integer, please correct. </span>');
                                 }
                             }
                         });

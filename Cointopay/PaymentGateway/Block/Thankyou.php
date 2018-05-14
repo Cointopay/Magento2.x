@@ -10,6 +10,7 @@ class Thankyou extends \Magento\Sales\Block\Order\Totals
     protected $checkoutSession;
     protected $customerSession;
     protected $_orderFactory;
+    protected $_coreSession;
     
     public function __construct(
         \Magento\Checkout\Model\Session $checkoutSession,
@@ -38,10 +39,12 @@ class Thankyou extends \Magento\Sales\Block\Order\Totals
 
     public function getCointopayHtml ()
     {
-        if (isset($_SESSION['cointopay_response'])) {
-            $response = $_SESSION['cointopay_response'];
-            unset($_SESSION['cointopay_response']);
-            return json_decode($response);
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+        $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+        $cointopay_response = $customerSession->getCoinresponse();
+        if (isset($cointopay_response)) {
+            $customerSession->unsCoinresponse();
+            return json_decode($cointopay_response);
         }
         return false;
     }

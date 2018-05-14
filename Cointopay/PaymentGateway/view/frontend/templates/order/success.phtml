@@ -85,9 +85,9 @@ $order = $block->getOrder();
 	        <?php $cointopay_content = $block->getCointopayHtml() ?>
 	        <?php if ($cointopay_content) { ?>
 		        <div class="popup-overlay cointopay active">
-		          	<div class="popup-content cointopay active">
-                <img src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" /> 
-			            <h1> PAYMENT DETAILS </h1>
+		          	<div class="popup-content cointopay active">    
+                        <img src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" />
+                        <h1> PAYMENT DETAILS </h1>
 			            <img src="<?= $cointopay_content->QRCodeURL ?>" alt="QR Scan Cointopay" />
 			            <div class="cointopay_details">
 				            <p class="remaining_amount"><strong>Amount:</strong><br>
@@ -120,10 +120,9 @@ $order = $block->getOrder();
                                         data: {paymentaction:selected_coin, type:'status'},
                                         type: "POST",
                                         success: function(result) {
-                                            var response = JSON.parse(result);
-                                            if (response[1] == 'paid') {
+                                            if (result.status == 'paid') {
                                                 $('.popup-content.cointopay').html('<h3>Thank you, your payment is received!</h3>');
-                                            } else if (response[1] == 'expired') {
+                                            } else if (result.status == 'expired') {
                                                 $('.popup-content.cointopay').html('<h3>Payment time expired!</h3>');
                                             }
                                         }

@@ -11,7 +11,8 @@ class Index extends \Magento\Framework\App\Action\Action
     protected $_context;
     protected $_pageFactory;
     protected $_jsonEncoder;
-
+    protected $_coreSession;
+    protected $resultJsonFactory;
     /**
    * @var \Magento\Framework\App\Config\ScopeConfigInterface
    */
@@ -104,6 +105,7 @@ class Index extends \Magento\Framework\App\Action\Action
     * @param \Magento\Framework\App\Config\ScopeConfigInterface    $scopeConfig
     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
+    * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
     * @param \Magento\Framework\Registry $registry
     */
     public function __construct (
@@ -113,6 +115,8 @@ class Index extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\View\Result\PageFactory $pageFactory,
+        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
+        \Magento\Framework\Session\SessionManagerInterface $coreSession,
         \Magento\Framework\Registry $registry
     ) {
         $this->_context = $context;
@@ -121,6 +125,8 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->scopeConfig = $scopeConfig;
         $this->_storeManager = $storeManager;
         $this->_pageFactory = $pageFactory;
+        $this->resultJsonFactory = $resultJsonFactory;
+        $this->_coreSession = $coreSession;
         $this->_registry = $registry;
         parent::__construct($context);
     }
@@ -129,19 +135,27 @@ class Index extends \Magento\Framework\App\Action\Action
     {
         if ($this->getRequest()->isXmlHttpRequest()) {
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-            $this->coinId = $this->getRequest()->getPost('paymentaction');
-            $type = $this->getRequest()->getPost('type');
+            $this->coinId = $this->getRequest()->getParam('paymentaction');
+            $this->merchantId = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope));
+            $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
+            $type = $this->getRequest()->getParam('type');
+            $this->currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
             if ($type == 'status') {
                 $response = $this->getStatus($this->coinId);
+                /** @var \Magento\Framework\Controller\Result\Json $result */
+                $result = $this->resultJsonFactory->create();
+                return $result->setData(['status' => $response]);
             } else {
-                $_SESSION['coin_id'] = $this->coinId;
-                print json_encode( 
-                    array (
-                        'status' => 'success',
-                        'coindid' => $this->coinId,
-                    )
-                );
-                die;
+                $this->_coreSession->start();
+                $this->_coreSession->setCoinid($this->coinId);
+                $isVerified = $this->verifyOrder();
+                /** @var \Magento\Framework\Controller\Result\Json $result */
+                $result = $this->resultJsonFactory->create();
+                if ($isVerified == 'success') {
+                    return $result->setData(['status' => 'success', 'coindid' => $this->coinId]);
+                } else {
+                    return $result->setData(['status' => 'error' , 'message' => $isVerified]);
+                }
             }
         }
         return;
@@ -155,9 +169,9 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID='.$this->merchantId.'&Amount='.$this->orderTotal.'&AltCoinID='.$this->coinId.'&CustomerReferenceNr=buy%20something%20from%20me&SecurityCode='.$this->securityKey.'&output=json&inputCurrency='.$this->currencyCode;
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
-        $orderresponse = @json_decode($response);
-        print_r($response);
-        die;
+        /** @var \Magento\Framework\Controller\Result\Json $result */
+        $result = $this->resultJsonFactory->create();
+        return $result->setData($response);
     }
 
     /**
@@ -179,7 +193,19 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->_curlUrl = 'https://cointopay.com/CloneMasterTransaction?MerchantID='.$this->merchantId.'&TransactionID='.$TransactionID.'&output=json';
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
-        print_r($response);
-        die;
+        $decoded = json_decode($response);
+        return $decoded[1];
+    }
+
+    // verify that if order can be placed or not
+    private function verifyOrder () {
+        $this->orderTotal = $this->getCartAmount();
+        $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID='.$this->merchantId.'&Amount='.$this->orderTotal.'&AltCoinID='.$this->coinId.'&CustomerReferenceNr=buy%20something%20from%20me&SecurityCode='.$this->securityKey.'&output=json&inputCurrency='.$this->currencyCode.'&testcheckout';
+        $this->_curl->get($this->_curlUrl);
+        $response = $this->_curl->getBody();
+        if ($response == '"testcheckout success"') {
+            return 'success';
+        }
+        return $response;
     }
 }

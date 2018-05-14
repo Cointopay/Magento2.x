@@ -51,11 +51,21 @@ class Index extends \Magento\Backend\App\Action
     {
         if ($this->getRequest()->isXmlHttpRequest()) {
             $this->merchantId = $this->getRequest()->getPost('merchant');
-            if (isset($this->merchantId))
-            {
-                $this->response = $this->getSupportedCoins();
+            $type = $this->getRequest()->getPost('type');
+            if ($type == 'merchant') {
+                if (isset($this->merchantId))
+                {
+                    $this->response = $this->getSupportedCoins();
+                }
+                $this->getResponse()->representJson($this->_jsonEncoder->encode($this->response));
+            } else {
+                $response = $this->verifyCode();
+                if ($response) {
+                    $this->getResponse()->representJson($this->_jsonEncoder->encode(array ('status' => 'success')));
+                } else {
+                    $this->getResponse()->representJson($this->_jsonEncoder->encode(array ('status' => 'error')));
+                }
             }
-            $this->getResponse()->representJson($this->_jsonEncoder->encode($this->response));
         }
         return;
     }
@@ -84,5 +94,17 @@ class Index extends \Magento\Backend\App\Action
             } 
         }
         return $coins;
+    }
+
+    // verify security code
+    private function verifyCode () {
+        $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID=123&Amount=1000&AltCoinID=1&CustomerReferenceNr=buy%20something%20from%20me&SecurityCode='.$this->merchantId.'&inputCurrency=EUR&output=json&testmerchant';
+        $this->_curl->get($this->_curlUrl);
+        $response = $this->_curl->getBody();
+        if ($response == '"SecurityCode should be type Integer, please correct."') {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

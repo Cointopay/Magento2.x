@@ -13,6 +13,14 @@
                         type: "POST",
                         success: function(result) {
                             // api response
+                            if (result.status == 'error') {
+                                $('.checkout.cointopay-order').closest('.payment-method').find('.cointopay-error').remove();
+                                $('.checkout.cointopay-order').closest('.payment-method').find('.messages').append('<div role="alert" class="message message-error error cointopay-error"><div data-ui-id="checkout-cart-validationmessages-message-error cointopay-error" data-bind="text: $data"> Checkout Error:'+result.message+'</div></div>');
+                                $('.checkout.cointopay-order').hide();
+                            } else {
+                                $('.checkout.cointopay-order').closest('.payment-method').find('.cointopay-error').remove();
+                                $('.checkout.cointopay-order').show();
+                            }
                         }
                     });
                 });
@@ -27,6 +35,14 @@
                             type: "POST",
                             success: function(result) {
                                 // api response
+                                if (result.status == 'error') {
+                                    $('.checkout.cointopay-order').closest('.payment-method').find('.cointopay-error').remove();
+                                    $('.checkout.cointopay-order').closest('.payment-method').find('.messages').append('<div role="alert" class="message message-error error cointopay-error"><div data-ui-id="checkout-cart-validationmessages-message-error cointopay-error" data-bind="text: $data"> Checkout Error: '+result.message+'</div></div>');
+                                    $('.checkout.cointopay-order').hide();
+                                } else {
+                                    $('.checkout.cointopay-order').closest('.payment-method').find('.cointopay-error').remove();
+                                    $('.checkout.cointopay-order').show();
+                                }
                             }
                         });
                         clearInterval(interval);

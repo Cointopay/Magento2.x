@@ -14,6 +14,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     protected $_context;
     protected $_pageFactory;
     protected $_jsonEncoder;
+    protected $_coreSession;
 
     /**
    * @var \Magento\Framework\App\Config\ScopeConfigInterface
@@ -121,6 +122,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         \Magento\Framework\View\Result\PageFactory $pageFactory,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Sales\Model\Order\Status\HistoryFactory $historyFactory,
+        \Magento\Framework\Session\SessionManagerInterface $coreSession,
         \Magento\Sales\Model\OrderFactory $orderFactory
     )
     {
@@ -133,6 +135,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         $this->_pageFactory = $pageFactory;
         $this->_request = $request;
         $this->_historyFactory = $historyFactory;
+        $this->_coreSession = $coreSession;
         $this->_orderFactory = $orderFactory;
     }
 
@@ -152,15 +155,19 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
         $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
-        $this->coinId = $_SESSION['coin_id'];
+        $this->_coreSession->start();
+        $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
         if ($payment_method_code == 'cointopay_gateway') {
             $response = $this->sendCoins($lastOrderId);
-            $_SESSION['cointopay_response'] = $response;
+            // $_SESSION['cointopay_response'] = $response;
+            $this->_coreSession->setCointopayresponse($response);
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+            $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+            $customerSession->setCoinresponse($response); //set value in customer session
             $orderresponse = @json_decode($response);
             $order->setExtOrderId($orderresponse->TransactionID);
             $order->save();
         }
-        exit;
     }
 
     /**
@@ -172,15 +179,9 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         $this->merchantKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_KEY, $storeScope));
         $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
         $this->currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
-        
         $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID='.$this->merchantId.'&Amount='.$this->orderTotal.'&AltCoinID='.$this->coinId.'&CustomerReferenceNr='.$orderId.'&SecurityCode='.$this->securityKey.'&output=json&inputCurrency='.$this->currencyCode;
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
-        $orderresponse = @json_decode($response);
-        $this->logger->info('$this->orderTotal respinse from cointopay');
-        $this->logger->info(print_r($orderresponse, true));
-        $this->logger->info($orderresponse->TransactionID);
-        $this->logger->info('$payment_method_code ****');
         return $response;
     }
 }
