@@ -6,7 +6,6 @@
 namespace Cointopay\PaymentGateway\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Event\Observer;
 
 class SalesOrderPlaceAfterObserver implements ObserverInterface
 {
@@ -147,16 +146,19 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         /** @var $orderInstance Order */
-        $order = $observer->getOrder();
-        $lastOrderId = $observer->getOrder()->getIncrementId();
-        $this->orderTotal = $observer->getOrder()->getGrandTotal();
-        $payment_method_code = $order->getPayment()->getMethodInstance()->getCode();
-        // getting data from file
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
-        $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
+        $order = $observer->getEvent()->getOrderIds();
+        $orderId = $order[0];
+        $this->coinId = $_SESSION['coin_id'];
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();       
+        $orderObject = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
+        $lastOrderId = $orderObject->getIncrementId();
+        $this->orderTotal = $orderObject->getGrandTotal();
+        $payment_method_code = $orderObject->getPayment()->getMethodInstance()->getCode();
+        // // getting data from file
+        // $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
+        // $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
         $this->_coreSession->start();
-        $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
+        // $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
         if ($payment_method_code == 'cointopay_gateway') {
             $response = $this->sendCoins($lastOrderId);
             // $_SESSION['cointopay_response'] = $response;
@@ -165,8 +167,8 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
             $customerSession = $objectManager->get('Magento\Customer\Model\Session');
             $customerSession->setCoinresponse($response); //set value in customer session
             $orderresponse = @json_decode($response);
-            $order->setExtOrderId($orderresponse->TransactionID);
-            $order->save();
+            $orderObject->setExtOrderId($orderresponse->TransactionID);
+            $orderObject->save();
         }
     }
 

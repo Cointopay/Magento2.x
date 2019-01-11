@@ -7,13 +7,29 @@
 define(
     [
         'uiComponent',
-        'Magento_Checkout/js/model/payment/renderer-list'
+        'Magento_Checkout/js/model/payment/renderer-list',
+        'jquery'
     ],
     function (
         Component,
-        rendererList
+        rendererList,
+        $
     ) {
         'use strict';
+        $(function() {
+            $(document).on('change', ".cointopay_coin_val", function () {
+                var coinVal = $(this).val();
+                    $.ajax ({
+                        url: '/paymentcointopay/coin/',
+                        showLoader: true,
+                        data: {coinId:coinVal, type:'security'},
+                        type: "POST",
+                        success: function(result) {
+                            
+                        }
+                    });
+                });
+            });
         rendererList.push(
             {
                 type: 'cointopay_gateway',

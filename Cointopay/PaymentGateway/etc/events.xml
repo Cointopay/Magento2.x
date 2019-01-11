@@ -10,7 +10,7 @@
     <event name="payment_method_assign_data">
         <observer name="cointopay_payment_gateway_data_assign" instance="Cointopay\PaymentGateway\Observer\DataAssignObserver" />
     </event>
-    <event name="checkout_submit_all_after">
-        <observer name="cointopay_payment_place_order_after" instance="Cointopay\PaymentGateway\Observer\SalesOrderPlaceAfterObserver" />
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="checkout_controller_success_action" instance="Cointopay\PaymentGateway\Observer\SalesOrderPlaceAfterObserver" />
     </event>
 </config>
