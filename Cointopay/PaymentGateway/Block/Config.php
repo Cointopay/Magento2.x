@@ -41,4 +41,18 @@ class Config extends ConfigurableInfo
     {
         return $this->getUrl("paymentcointopay");
     }
+
+    /**
+     * Returns value view
+     *
+     * @return string | Status
+     */
+    public function cointopayReference ($status) {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+        $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+        if (isset($customerSession) && isset($status)) {
+            return json_encode('cointopay_ref');
+        }
+        return false;
+    }
 }

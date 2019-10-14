@@ -11,6 +11,7 @@
     "type": "magento2-module",
     "version": "100.0.3",
     "license": [
+        "OSL-3.0",
         "GPL-3.0"
     ],
     "autoload": {

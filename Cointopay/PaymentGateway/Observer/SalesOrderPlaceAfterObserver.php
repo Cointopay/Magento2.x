@@ -176,12 +176,16 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     * @return json response
     **/
     private function sendCoins ($orderId = 0) {
+        $objectManager =  \Magento\Framework\App\ObjectManager::getInstance(); 
+        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+        $store = $storeManager->getStore();
+        $baseUrl = $store->getBaseUrl();
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
         $this->merchantId = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope));
         $this->merchantKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_KEY, $storeScope));
         $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
         $this->currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
-        $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID='.$this->merchantId.'&Amount='.$this->orderTotal.'&AltCoinID='.$this->coinId.'&CustomerReferenceNr='.$orderId.'&SecurityCode='.$this->securityKey.'&output=json&inputCurrency='.$this->currencyCode;
+        $this->_curlUrl = 'https://cointopay.com/MerchantAPI?Checkout=true&MerchantID='.$this->merchantId.'&Amount='.$this->orderTotal.'&AltCoinID='.$this->coinId.'&CustomerReferenceNr='.$orderId.'&SecurityCode='.$this->securityKey.'&output=json&inputCurrency='.$this->currencyCode.'&transactionconfirmurl='.$baseUrl.'paymentcointopay/order/&transactionfailurl='.$baseUrl.'paymentcointopay/order/';
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
         return $response;
