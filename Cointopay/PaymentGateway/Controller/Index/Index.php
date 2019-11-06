@@ -5,6 +5,7 @@
 */
 
 namespace Cointopay\Paymentgateway\Controller\Index;
+use Magento\Sales\Model\Order;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
@@ -13,6 +14,10 @@ class Index extends \Magento\Framework\App\Action\Action
     protected $_jsonEncoder;
     protected $_coreSession;
     protected $resultJsonFactory;
+    protected $_objectManager;
+    protected $_checkoutSession;
+    protected $_orderFactory;
+
     /**
    * @var \Magento\Framework\App\Config\ScopeConfigInterface
    */
@@ -117,6 +122,9 @@ class Index extends \Magento\Framework\App\Action\Action
         \Magento\Framework\View\Result\PageFactory $pageFactory,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Magento\Framework\Session\SessionManagerInterface $coreSession,
+        \Magento\Framework\ObjectManagerInterface $objectmanager,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
         \Magento\Framework\Registry $registry
     ) {
         $this->_context = $context;
@@ -127,6 +135,9 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->_pageFactory = $pageFactory;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->_coreSession = $coreSession;
+        $this->_objectManager = $objectmanager;
+        $this->_checkoutSession = $checkoutSession;
+        $this->_orderFactory = $orderFactory;
         $this->_registry = $registry;
         parent::__construct($context);
     }
@@ -142,6 +153,13 @@ class Index extends \Magento\Framework\App\Action\Action
             $this->currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
             if ($type == 'status') {
                 $response = $this->getStatus($this->coinId);
+                if ($response == 'paid') {
+                    $orderId = $this->getRealOrderId();
+                    $order = $this->_objectManager->create('\Magento\Sales\Model\Order')->load($orderId);
+                    $orderState = Order::STATE_COMPLETE;
+                    $order->setState($orderState)->setStatus(Order::STATE_COMPLETE);
+                    $order->save();
+                }
                 /** @var \Magento\Framework\Controller\Result\Json $result */
                 $result = $this->resultJsonFactory->create();
                 return $result->setData(['status' => $response]);
@@ -207,5 +225,12 @@ class Index extends \Magento\Framework\App\Action\Action
             return 'success';
         }
         return $response;
+    }
+
+    // get last order real ID
+    public function getRealOrderId()
+    {
+        $lastorderId = $this->_checkoutSession->getLastOrderId();
+        return $lastorderId;
     }
 }
