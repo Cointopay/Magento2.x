@@ -7,6 +7,7 @@ class Index extends \Magento\Backend\App\Action
     protected $_context;
     protected $_pageFactory;
     protected $_jsonEncoder;
+    protected $_jsonDecoder;
 
     /**
     * @var \Magento\Framework\HTTP\Client\Curl
@@ -31,17 +32,20 @@ class Index extends \Magento\Backend\App\Action
     /*
     * @param \Magento\Backend\App\Action\Context $context
     * @param \Magento\Framework\Json\EncoderInterface $encoder
+    * @param \Magento\Framework\Json\DecoderInterface $decoder
     * @param \Magento\Framework\HTTP\Client\Curl $curl
     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
     */
     public function __construct (
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Json\EncoderInterface $encoder,
+        \Magento\Framework\Json\DecoderInterface $decoder,
         \Magento\Framework\HTTP\Client\Curl $curl,
         \Magento\Framework\View\Result\PageFactory $pageFactory
     ) {
         $this->_context = $context;
         $this->_jsonEncoder = $encoder;
+        $this->_jsonDecoder = $decoder;
         $this->_curl = $curl;
         $this->_pageFactory = $pageFactory;
         parent::__construct($context);
@@ -78,7 +82,7 @@ class Index extends \Magento\Backend\App\Action
         $this->_curlUrl = 'https://cointopay.com/CloneMasterTransaction?MerchantID='.$this->merchantId.'&output=json';
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
-        $supportedCoins = @json_decode($response);
+        $supportedCoins = $this->_jsonDecoder->decode($response);
         $coins = [];
         if (count($supportedCoins) > 0)
         {

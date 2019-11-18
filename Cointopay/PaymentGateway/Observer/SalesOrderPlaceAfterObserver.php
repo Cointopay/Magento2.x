@@ -14,6 +14,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     protected $_pageFactory;
     protected $_jsonEncoder;
     protected $_coreSession;
+    protected $_jsonDecoder;
 
     /**
    * @var \Magento\Framework\App\Config\ScopeConfigInterface
@@ -104,6 +105,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
     /**
     * @var \Magento\Framework\Stdlib\CookieManagerInterface
     * @param \Magento\Framework\Json\EncoderInterface $encoder
+    * @param \Magento\Framework\Json\DecoderInterface $decoder,
     * @param \Magento\Framework\HTTP\Client\Curl $curl
     * @param \Magento\Framework\App\Config\ScopeConfigInterface    $scopeConfig
     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
@@ -115,6 +117,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager,
         \Magento\Framework\Json\EncoderInterface $encoder,
+        \Magento\Framework\Json\DecoderInterface $decoder,
         \Magento\Framework\HTTP\Client\Curl $curl,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
@@ -128,6 +131,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         $this->logger = $logger;
         $this->_cookieManager = $cookieManager;
         $this->_jsonEncoder = $encoder;
+        $this->_jsonDecoder = $decoder;
         $this->_curl = $curl;
         $this->scopeConfig = $scopeConfig;
         $this->_storeManager = $storeManager;
@@ -148,7 +152,9 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         /** @var $orderInstance Order */
         $order = $observer->getEvent()->getOrderIds();
         $orderId = $order[0];
-        $this->coinId = $_SESSION['coin_id'];
+        $this->_coreSession->start();
+        $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
+        // $this->coinId = $_SESSION['coin_id'];
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();       
         $orderObject = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
         $lastOrderId = $orderObject->getIncrementId();
@@ -157,8 +163,6 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
         // // getting data from file
         // $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
         // $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
-        $this->_coreSession->start();
-        // $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
         if ($payment_method_code == 'cointopay_gateway') {
             $response = $this->sendCoins($lastOrderId);
             // $_SESSION['cointopay_response'] = $response;
@@ -166,8 +170,8 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
             $customerSession = $objectManager->get('Magento\Customer\Model\Session');
             $customerSession->setCoinresponse($response); //set value in customer session
-            $orderresponse = @json_decode($response);
-            $orderObject->setExtOrderId($orderresponse->TransactionID);
+            $orderresponse = $this->_jsonDecoder->decode($response);
+            $orderObject->setExtOrderId($orderresponse['TransactionID']);
             $orderObject->save();
         }
     }

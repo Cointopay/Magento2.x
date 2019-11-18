@@ -134,7 +134,8 @@ class Index extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         $cCoinId = $this->getRequest()->getParam('coinId');
-        $_SESSION['coin_id'] = $cCoinId;
-        exit;
+        $this->_coreSession->start();
+        $this->_coreSession->setCoinId($cCoinId);
+        return $this->getResponse()->setBody($cCoinId);
     }
 }

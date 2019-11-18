@@ -11,7 +11,9 @@ use Magento\Payment\Model\Method\AbstractMethod;
  * Class SupportedCoin
  */
 class SupportedCoin implements \Magento\Framework\Option\ArrayInterface
-{   
+{
+    protected $_jsonDecoder;
+
    /**
    * @var \Magento\Framework\App\Config\ScopeConfigInterface
    */
@@ -39,14 +41,17 @@ class SupportedCoin implements \Magento\Framework\Option\ArrayInterface
 
     /**
     * @param \Magento\Framework\App\Config\ScopeConfigInterface    $scopeConfig
+    * @param \Magento\Framework\Json\DecoderInterface $decoder
     * @param \Magento\Framework\HTTP\Client\Curl                   $curl
     */
     public function __construct (
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Magento\Framework\Json\DecoderInterface $decoder,
         \Magento\Framework\HTTP\Client\Curl $curl
     )
     {
         $this->scopeConfig = $scopeConfig;
+        $this->_jsonDecoder = $decoder;
         $this->_curl = $curl;
     }
 
@@ -71,7 +76,7 @@ class SupportedCoin implements \Magento\Framework\Option\ArrayInterface
         $this->_curlUrl = 'https://cointopay.com/CloneMasterTransaction?MerchantID='.$this->merchantId.'&output=json';
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();
-        $supportedCoins = @json_decode($response);
+        $supportedCoins = $this->_jsonDecoder->decode($response);
         $coins = [];
         if (count($supportedCoins) > 0)
         {
