@@ -100,6 +100,7 @@ $order = $block->getOrder();
 				            <p class="trxid"><strong>Transaction ID: </strong> <br><?= $cointopay_content->TransactionID ?></p>
 				            <p class="description">Make sure to send enough to cover  any coin transaction fees!</p>
 				            <p class="description">Send an equal amount or more.</p>
+                             <p class="description"> <a target="_blank" href="<?=  $cointopay_content->RedirectURL ?>">View Invoice details</a></p>
 				            <?php /* <button class="action primary confirm_payments" id="confirm_payments">Confirm Payments</button> */ ?>
 				            <input type="hidden" id="cointopay_trid" value="<?= $cointopay_content->TransactionID ?>" >
 			            </div>
