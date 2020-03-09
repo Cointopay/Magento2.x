@@ -134,7 +134,7 @@ class Index extends \Magento\Framework\App\Action\Action
             $notenough = $this->getRequest()->getParam('notenough');
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
             $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
-            if (is_numeric($customerReferenceNr)) {
+            //if (is_numeric($customerReferenceNr)) {
                 if ($this->securityKey == $SecurityCode) {
                     $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
                     $order = $objectManager->create('\Magento\Sales\Model\Order')
@@ -192,15 +192,15 @@ class Index extends \Magento\Framework\App\Action\Action
                         'message' => 'Security key is not valid.'
                     ]);
                 }
-            } else {
+            /*} else {
                 /** @var \Magento\Framework\Controller\Result\Json $result */
-                $result = $this->resultJsonFactory->create();
+                /* $result = $this->resultJsonFactory->create();
                 return $result->setData([
                     'CustomerReferenceNr' => $customerReferenceNr,
                     'status' => 'error',
                     'message' => 'CustomerReferenceNr should be an integer.'
                 ]);
-            }
+            }*/
         } catch (\Exception $e) {
             /** @var \Magento\Framework\Controller\Result\Json $result */
             $result = $this->resultJsonFactory->create();
