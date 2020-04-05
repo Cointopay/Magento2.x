@@ -2,6 +2,8 @@
 
 Please follow the Magento install instructions mentioned here: <a href="https://docs.google.com/document/d/1hwf0kMoCFeNQWJGxyRnj7sspiUVtaFHkJ7cMj8hRJx0/edit?usp=sharing" target="_new">download magento documentation</a> or direct link: https://docs.google.com/document/d/1hwf0kMoCFeNQWJGxyRnj7sspiUVtaFHkJ7cMj8hRJx0/edit?usp=sharing
 
+View this Cointopay payment plugin on MARKETPLACE.MAGENTO.COM: https://marketplace.magento.com/cointopay-paymentgateway.html
+
 ### Support or Contact
 
 Please contact support@cointopay.com for feature requests and/or incidents, or create a ticket here: https://cointopay.freshdesk.com/helpdesk
