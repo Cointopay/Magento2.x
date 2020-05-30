@@ -1,8 +1,5 @@
 ## Official Cointopay Magento 2.x plugin
 
-### PLEASE NOTE THAT WE BRANCHED AT 2.3.5-pre1, THIS PLUGIN CODE IS WORKING WITH VERSIONS BEFORE THAT RELEASE
-#### SEE version 2.3.5x for plugin code of that branch
-
 Please follow the Magento install instructions mentioned here: <a href="https://docs.google.com/document/d/1hwf0kMoCFeNQWJGxyRnj7sspiUVtaFHkJ7cMj8hRJx0/edit?usp=sharing" target="_new">download magento documentation</a> or direct link: https://docs.google.com/document/d/1hwf0kMoCFeNQWJGxyRnj7sspiUVtaFHkJ7cMj8hRJx0/edit?usp=sharing
 
 View this Cointopay payment plugin on MARKETPLACE.MAGENTO.COM: https://marketplace.magento.com/cointopay-paymentgateway.html
