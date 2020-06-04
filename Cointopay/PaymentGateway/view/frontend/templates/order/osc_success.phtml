@@ -17,6 +17,8 @@ if ($customerSession->getCointopayresponseGateway() && $customerSession->getCoin
 			background: #ffffff;
 			width: 90%;
 			z-index: 9;
+			display: table;
+            margin: auto;
 		}
 		.popup-overlay.active{
 		  visibility:visible;
@@ -28,9 +30,14 @@ if ($customerSession->getCointopayresponseGateway() && $customerSession->getCoin
 		.popup-content.active {
 		  visibility:visible;
 		}
+		img.Qrimg{
+		  display: table;
+		  margin: auto;
+		}
 		.cointopay_details {
 		  width: 80%;
-		  display: inline-block;
+		  display: table;
+          margin: auto;
 		}
 		.cointopay_details .remaining_amount {
 		  width: 100%;
@@ -77,9 +84,9 @@ if ($customerSession->getCointopayresponseGateway() && $customerSession->getCoin
 		<?php if ($customerSession->getCoinresponse()) {  $cointopay_content = json_decode($customerSession->getCoinresponse());?>
 			<div class="popup-overlay cointopay active">
 				<div class="popup-content cointopay active">    
-					<img src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" />
+					<img class="Qrimg" src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" />
 					<h1> PAYMENT DETAILS </h1>
-					<img src="<?= $cointopay_content->QRCodeURL ?>" alt="QR Scan Cointopay" />
+					<img class="Qrimg" src="<?= $cointopay_content->QRCodeURL ?>" alt="QR Scan Cointopay" />
 					<div class="cointopay_details">
 						<p class="remaining_amount"><strong>Amount:</strong><br>
 							<?=  $cointopay_content->Amount.' ' ?>
