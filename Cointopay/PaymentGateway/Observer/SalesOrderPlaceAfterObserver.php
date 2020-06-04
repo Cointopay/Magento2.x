@@ -181,7 +181,7 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
 			$customerSession->setCointopayresponseOrderId($orderId);
 			$customerSession->setCointopayresponselastOrderId($lastOrderId);
 			$customerSession->setCointopayresponselastBaseUrl($baseUrl);
-			$order->setExtOrderId($orderresponse['CustomerReferenceNr']);
+			$order->setExtOrderId($orderresponse['TransactionID']);
 			$order->save();
 		}
     }
