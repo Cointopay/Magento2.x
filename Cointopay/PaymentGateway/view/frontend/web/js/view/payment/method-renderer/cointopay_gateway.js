@@ -6,9 +6,10 @@
 /*global define*/
 define(
     [
-        'Magento_Checkout/js/view/payment/default'
+        'Magento_Checkout/js/view/payment/default',
+		'Magento_Checkout/js/action/redirect-on-success',
     ],
-    function (Component) {
+    function (Component, redirectOnSuccessAction, url) {
         'use strict';
 
         return Component.extend({
@@ -46,6 +47,9 @@ define(
                         'transaction_result': value
                     }
                 });
+            },
+            afterPlaceOrder: function () {
+               console.log( redirectOnSuccessAction.redirectUrl );
             }
         });
     }

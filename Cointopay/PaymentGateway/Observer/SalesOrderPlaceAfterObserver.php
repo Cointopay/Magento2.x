@@ -149,31 +149,41 @@ class SalesOrderPlaceAfterObserver implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        /** @var $orderInstance Order */
-        $order = $observer->getEvent()->getOrderIds();
-        $orderId = $order[0];
-        $this->_coreSession->start();
-        $this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
-        // $this->coinId = $_SESSION['coin_id'];
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();       
-        $orderObject = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
-        $lastOrderId = $orderObject->getIncrementId();
-        $this->orderTotal = $orderObject->getGrandTotal();
-        $payment_method_code = $orderObject->getPayment()->getMethodInstance()->getCode();
-        // // getting data from file
-        // $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
-        // $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
-        if ($payment_method_code == 'cointopay_gateway') {
-            $response = $this->sendCoins($lastOrderId);
-            // $_SESSION['cointopay_response'] = $response;
-            $this->_coreSession->setCointopayresponse($response);
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
-            $customerSession = $objectManager->get('Magento\Customer\Model\Session');
-            $customerSession->setCoinresponse($response); //set value in customer session
-            $orderresponse = $this->_jsonDecoder->decode($response);
-            $orderObject->setExtOrderId($orderresponse['TransactionID']);
-            $orderObject->save();
-        }
+		/** @var $orderInstance Order */
+		$order = $observer->getEvent()->getOrder();
+		$orderId = $order->getId();
+		$this->_coreSession->start();
+		$this->coinId =  $this->_coreSession->getCoinid(); //$_SESSION['coin_id'];
+		//$this->coinId = $_SESSION['coin_id'];
+		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();				
+		//$orderObject = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
+		$lastOrderId = $order->getIncrementId();
+		$this->orderTotal = $order->getGrandTotal();
+		$payment_method_code = $order->getPayment()->getMethodInstance()->getCode();
+		$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+		$store = $storeManager->getStore();
+		$baseUrl = $store->getBaseUrl();
+		// // getting data from file
+		// $fileSystem = $objectManager->create('\Magento\Framework\Filesystem');
+		// $mediaPath=$fileSystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA)->getAbsolutePath();
+		if ($payment_method_code == 'cointopay_gateway') {
+			$response = $this->sendCoins($lastOrderId);
+			$orderresponse = $this->_jsonDecoder->decode($response);
+			if(!isset($orderresponse['TransactionID'])){
+				throw new \Magento\Framework\Exception\LocalizedException(__($response));
+			}
+			// $_SESSION['cointopay_response'] = $response;
+			$this->_coreSession->setCointopayresponse($response);
+			$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+			$customerSession = $objectManager->get('Magento\Customer\Model\Session');
+			$customerSession->setCoinresponse($response); //set value in customer session
+			$customerSession->setCointopayresponseGateway($payment_method_code);
+			$customerSession->setCointopayresponseOrderId($orderId);
+			$customerSession->setCointopayresponselastOrderId($lastOrderId);
+			$customerSession->setCointopayresponselastBaseUrl($baseUrl);
+			$order->setExtOrderId($orderresponse['CustomerReferenceNr']);
+			$order->save();
+		}
     }
 
     /**
