@@ -10,7 +10,7 @@
         }
     ],
     "type": "magento2-module",
-    "version": "100.1.7",
+    "version": "100.1.12",
     "license": [
         "OSL-3.0",
         "GPL-3.0"
