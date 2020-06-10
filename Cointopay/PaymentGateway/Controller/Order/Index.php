@@ -134,73 +134,63 @@ class Index extends \Magento\Framework\App\Action\Action
             $notenough = $this->getRequest()->getParam('notenough');
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
             $this->securityKey = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope);
-            if (is_numeric($customerReferenceNr)) {
-                if ($this->securityKey == $SecurityCode) {
-                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-                    $order = $objectManager->create('\Magento\Sales\Model\Order')
-                        ->loadByIncrementId($customerReferenceNr);
-                    if (count($order->getData()) > 0) {
-                        if ($status == 'paid' && $notenough == 1) {
-                            $order->setState('pending_payment')->setStatus('pending_payment');
-                            $order->save();
-                        } else if ($status == 'paid') {
-                            $order->setState('complete')->setStatus('complete');
-                            $order->save();
-                        } else if ($status == 'failed') {
-                            if ($order->getStatus() == 'complete') {
-                                /** @var \Magento\Framework\Controller\Result\Json $result */
-                                $result = $this->resultJsonFactory->create();
-                                return $result->setData([
-                                    'CustomerReferenceNr' => $customerReferenceNr,
-                                    'status' => 'error',
-                                    'message' => 'Order cannot be cancel now, because it is completed now.'
-                                ]);
-                            } else {
-                                $this->orderManagement->cancel($order->getId());
-                            }
-                        } else {
-                            /** @var \Magento\Framework\Controller\Result\Json $result */
-                            $result = $this->resultJsonFactory->create();
-                            return $result->setData([
-                                'CustomerReferenceNr' => $customerReferenceNr,
-                                'status' => 'error',
-                                'message' => 'Order status should have valid value.'
-                            ]);
-                        }
-                        /** @var \Magento\Framework\Controller\Result\Json $result */
-                        $result = $this->resultJsonFactory->create();
-                        return $result->setData([
-                            'CustomerReferenceNr' => $customerReferenceNr,
-                            'status' => 'success',
-                            'message' => 'Order status successfully updated.'
-                        ]);
-                    } else {
-                        /** @var \Magento\Framework\Controller\Result\Json $result */
-                        $result = $this->resultJsonFactory->create();
-                        return $result->setData([
-                            'CustomerReferenceNr' => $customerReferenceNr,
-                            'status' => 'error',
-                            'message' => 'No order found.'
-                        ]);
-                    }
-                } else {
-                    /** @var \Magento\Framework\Controller\Result\Json $result */
-                    $result = $this->resultJsonFactory->create();
-                    return $result->setData([
-                        'CustomerReferenceNr' => $customerReferenceNr,
-                        'status' => 'error',
-                        'message' => 'Security key is not valid.'
-                    ]);
-                }
-            } else {
-                /** @var \Magento\Framework\Controller\Result\Json $result */
-                $result = $this->resultJsonFactory->create();
-                return $result->setData([
-                    'CustomerReferenceNr' => $customerReferenceNr,
-                    'status' => 'error',
-                    'message' => 'CustomerReferenceNr should be an integer.'
-                ]);
-            }
+            if ($this->securityKey == $SecurityCode) {
+				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+				$order = $objectManager->create('\Magento\Sales\Model\Order')
+					->loadByIncrementId($customerReferenceNr);
+				if (count($order->getData()) > 0) {
+					if ($status == 'paid' && $notenough == 1) {
+						$order->setState('pending_payment')->setStatus('pending_payment');
+						$order->save();
+					} else if ($status == 'paid') {
+						$order->setState('complete')->setStatus('complete');
+						$order->save();
+					} else if ($status == 'failed') {
+						if ($order->getStatus() == 'complete') {
+							/** @var \Magento\Framework\Controller\Result\Json $result */
+							$result = $this->resultJsonFactory->create();
+							return $result->setData([
+								'CustomerReferenceNr' => $customerReferenceNr,
+								'status' => 'error',
+								'message' => 'Order cannot be cancel now, because it is completed now.'
+							]);
+						} else {
+							$this->orderManagement->cancel($order->getId());
+						}
+					} else {
+						/** @var \Magento\Framework\Controller\Result\Json $result */
+						$result = $this->resultJsonFactory->create();
+						return $result->setData([
+							'CustomerReferenceNr' => $customerReferenceNr,
+							'status' => 'error',
+							'message' => 'Order status should have valid value.'
+						]);
+					}
+					/** @var \Magento\Framework\Controller\Result\Json $result */
+					$result = $this->resultJsonFactory->create();
+					return $result->setData([
+						'CustomerReferenceNr' => $customerReferenceNr,
+						'status' => 'success',
+						'message' => 'Order status successfully updated.'
+					]);
+				} else {
+					/** @var \Magento\Framework\Controller\Result\Json $result */
+					$result = $this->resultJsonFactory->create();
+					return $result->setData([
+						'CustomerReferenceNr' => $customerReferenceNr,
+						'status' => 'error',
+						'message' => 'No order found.'
+					]);
+				}
+			} else {
+				/** @var \Magento\Framework\Controller\Result\Json $result */
+				$result = $this->resultJsonFactory->create();
+				return $result->setData([
+					'CustomerReferenceNr' => $customerReferenceNr,
+					'status' => 'error',
+					'message' => 'Security key is not valid.'
+				]);
+			}
         } catch (\Exception $e) {
             /** @var \Magento\Framework\Controller\Result\Json $result */
             $result = $this->resultJsonFactory->create();
