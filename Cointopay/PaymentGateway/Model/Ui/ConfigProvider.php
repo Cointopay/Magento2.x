@@ -81,8 +81,8 @@ class ConfigProvider implements ConfigProviderInterface
     public function toOptionArray()
     {
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        $this->merchantId = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope));
-        $defaultCoin = trim($this->scopeConfig->getValue(self::XML_PATH_DEFAULT_COIN, $storeScope));
+        $this->merchantId = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope);
+        $defaultCoin = $this->scopeConfig->getValue(self::XML_PATH_DEFAULT_COIN, $storeScope);
         if (isset($this->merchantId))
         {
             return $this->getSupportedCoins($defaultCoin);

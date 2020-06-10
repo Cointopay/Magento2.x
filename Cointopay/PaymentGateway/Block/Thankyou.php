@@ -44,10 +44,6 @@ class Thankyou extends \Magento\Sales\Block\Order\Totals
         $cointopay_response = $customerSession->getCoinresponse();
         if (isset($cointopay_response)) {
             $customerSession->unsCoinresponse();
-			$customerSession->unsCointopayresponseGateway();
-			$customerSession->unsCointopayresponseOrderId();
-			$customerSession->unsCointopayresponselastOrderId();
-			$customerSession->unsCointopayresponselastBaseUrl();
             return json_decode($cointopay_response);
         }
         return false;

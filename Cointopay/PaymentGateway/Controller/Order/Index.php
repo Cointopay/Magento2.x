@@ -133,8 +133,8 @@ class Index extends \Magento\Framework\App\Action\Action
             $SecurityCode = $this->getRequest()->getParam('SecurityCode');
             $notenough = $this->getRequest()->getParam('notenough');
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-            $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
-			if ($this->securityKey == $SecurityCode) {
+            $this->securityKey = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope);
+            if ($this->securityKey == $SecurityCode) {
 				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 				$order = $objectManager->create('\Magento\Sales\Model\Order')
 					->loadByIncrementId($customerReferenceNr);

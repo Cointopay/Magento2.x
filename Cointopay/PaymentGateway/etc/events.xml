@@ -13,7 +13,4 @@
     <event name="sales_order_place_after">
         <observer name="ctp_place_order_after" instance="Cointopay\PaymentGateway\Observer\SalesOrderPlaceAfterObserver" />
     </event>
-	<event name="cms_page_render">
-        <observer name="cointopay_cms_page_render" instance="Cointopay\PaymentGateway\Observer\PlaceOrderAfterObserver" cacheable="false" />
-    </event>
 </config>

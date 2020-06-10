@@ -11,10 +11,9 @@ class PlaceOrderAfterObserver implements ObserverInterface
 {
     protected $logger;
 
-    public function __construct(\Psr\Log\LoggerInterface $logger,\Magento\Sales\Model\Order $order)
+    public function __construct(\Psr\Log\LoggerInterface $logger)
     {
         $this->logger = $logger;
-		$this->order = $order;
     }
 
     /**
@@ -24,16 +23,8 @@ class PlaceOrderAfterObserver implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-		$event = $observer->getEvent();
-		$cms_page = $event->getPage();   
-		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-		$customerSession = $objectManager->get('Magento\Customer\Model\Session');
-
-
-		return $this;
-		// $this->logger->info('$orderId start 222');
-		// $this->logger->info($lastOrderId);
-		// $this->logger->info('I am inside observer');
-		// $this->logger->info('$orderId');
+        $this->logger->info('$orderId start 222');
+        $this->logger->info('I am inside observer');
+        $this->logger->info('$orderId');
     }
 }

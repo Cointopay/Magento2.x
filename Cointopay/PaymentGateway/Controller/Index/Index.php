@@ -147,8 +147,8 @@ class Index extends \Magento\Framework\App\Action\Action
         if ($this->getRequest()->isXmlHttpRequest()) {
             $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
             $this->coinId = $this->getRequest()->getParam('paymentaction');
-            $this->merchantId = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope));
-            $this->securityKey = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope));
+            $this->merchantId = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope);
+            $this->securityKey = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_SECURITY, $storeScope);
             $type = $this->getRequest()->getParam('type');
             $this->currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
             if ($type == 'status') {
@@ -207,7 +207,7 @@ class Index extends \Magento\Framework\App\Action\Action
     **/
     private function getStatus ($TransactionID) {
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        $this->merchantId = trim($this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope));
+        $this->merchantId = $this->scopeConfig->getValue(self::XML_PATH_MERCHANT_ID, $storeScope);
         $this->_curlUrl = 'https://cointopay.com/CloneMasterTransaction?MerchantID='.$this->merchantId.'&TransactionID='.$TransactionID.'&output=json';
         $this->_curl->get($this->_curlUrl);
         $response = $this->_curl->getBody();

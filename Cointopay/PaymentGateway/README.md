@@ -1,1 +1,1 @@
-# Cointopay Payment Gateway for Magento 2.x
+# Cointopay Payment Gateway for Magento 2
