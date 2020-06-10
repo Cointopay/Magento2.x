@@ -23,7 +23,10 @@ class PlaceOrderAfterObserver implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
+         // $order = $observer->getEvent()->getOrder();
+         // echo $orderId = $order->getId();
         $this->logger->info('$orderId start 222');
+        // $this->logger->info($lastOrderId);
         $this->logger->info('I am inside observer');
         $this->logger->info('$orderId');
     }

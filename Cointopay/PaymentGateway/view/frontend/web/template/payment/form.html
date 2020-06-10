@@ -31,11 +31,7 @@
             <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
         </div>
-		<div class="checkout-agreements-block">
-            <!-- ko foreach: $parent.getRegion('before-place-order') -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
-            <!--/ko-->
-        </div>
+
         <div class="field required">
             <label data-bind="attr: {for: getCode() + '_transaction_result'}" class="label cointopay-margin">
                 <span><!-- ko i18n: 'Select Crypto Currency:'--><!-- /ko --></span>
