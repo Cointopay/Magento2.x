@@ -82,8 +82,9 @@ $order = $block->getOrder();
         
 	    <!-- Cointopay popup Content -->
         <?php if ($payment_gateway_code == 'cointopay_gateway') { ?>
-	        <?php $cointopay_content = $block->getCointopayHtml() ?>
-	        <?php if ($cointopay_content) { ?>
+	        <?php $cointopay_content = $block->getCointopayHtml(); ?>
+	        <?php //if ($cointopay_content) {  $cointopay_content = $cointopay_content_data->data; 
+			      if ($cointopay_content) {?>
 		        <div class="popup-overlay cointopay active">
 		          	<div class="popup-content cointopay active">    
                         <img src="<?php echo $this->getViewFileUrl('Cointopay_PaymentGateway::images/cointopay.gif'); ?>" />
@@ -106,7 +107,6 @@ $order = $block->getOrder();
 			            </div>
 		          	</div>
 		        </div>
-		    <?php } ?>
             <script type="text/javascript">
                 require(
                     ['jquery'],
@@ -122,14 +122,17 @@ $order = $block->getOrder();
                                         type: "POST",
                                         success: function(result) {
                                             if (result.status == 'paid') {
-                                                $('.popup-content.cointopay').html('<h3>Thank you, your payment is received!</h3>');
+                                                $('.popup-content.cointopay').html('<h3>Thank you, your payment is received!</h3><p class="description"> <a target="_blank" href="<?=  $cointopay_content->RedirectURL ?>">View Invoice details</a></p>');
                                             } else if (result.status == 'expired') {
-                                                $('.popup-content.cointopay').html('<h3>Payment time expired!</h3>');
+                                                $('.popup-content.cointopay').html('<h3>Payment time expired!</h3><p class="description"> <a target="_blank" href="<?=  $cointopay_content->RedirectURL ?>">View Invoice details</a></p>');
+                                            }
+											 else if (result.status == 'underpaid') {
+                                                $('.popup-content.cointopay').html('<h3>You have underpaid, please pay the remaining amount or contact support!</h3><p class="description"> <a target="_blank" href="<?=  $cointopay_content->RedirectURL ?>">View Invoice details</a></p>');
                                             }
                                         }
                                     });
                                 }
-                            }, 50000);
+                            }, 10000);
                             
                             // count down time left
                             var d1 = new Date (),
@@ -167,6 +170,7 @@ $order = $block->getOrder();
                         });
                     });
             </script>
+			<?php } else { echo "No Cointopay data found due to empty session values"; } //} else { echo "No Cointopay Data Found"; } ?>
 	    <?php } ?>
 <?php } ?>
 <a class="action primary" style="float: right;" href="<?= $this->getBaseUrl() ?>">Continue Shopping</a>
